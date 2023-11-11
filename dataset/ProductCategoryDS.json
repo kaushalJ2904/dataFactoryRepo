@@ -1,0 +1,13 @@
+{
+	"name": "ProductCategoryDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADF_to_SQL_Server_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

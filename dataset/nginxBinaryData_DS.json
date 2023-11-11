@@ -1,0 +1,18 @@
+{
+	"name": "nginxBinaryData_DS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADF_to_ADLS_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "nginx"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

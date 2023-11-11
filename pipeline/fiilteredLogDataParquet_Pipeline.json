@@ -1,0 +1,42 @@
+{
+	"name": "fiilteredLogDataParquet_Pipeline",
+	"properties": {
+		"description": "A pipeline that loads filtered data from ADLS to Synapse dedicated pool (using a dataflow)",
+		"activities": [
+			{
+				"name": "dataflowFilteringRows",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "dataflowFilteringRows",
+						"type": "DataFlowReference"
+					},
+					"staging": {
+						"linkedService": {
+							"referenceName": "ADF_to_ADLS_LS",
+							"type": "LinkedServiceReference"
+						},
+						"folderPath": "staging"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-11-10T05:36:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

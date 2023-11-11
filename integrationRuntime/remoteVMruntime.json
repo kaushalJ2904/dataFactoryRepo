@@ -1,0 +1,6 @@
+{
+	"name": "remoteVMruntime",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}

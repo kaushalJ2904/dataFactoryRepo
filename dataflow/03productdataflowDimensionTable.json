@@ -1,0 +1,181 @@
+{
+	"name": "03productdataflowDimensionTable",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "productTableDS",
+						"type": "DatasetReference"
+					},
+					"name": "productTableStream"
+				},
+				{
+					"dataset": {
+						"referenceName": "ProductModelDS",
+						"type": "DatasetReference"
+					},
+					"name": "ProductModelTableStream"
+				},
+				{
+					"dataset": {
+						"referenceName": "ProductCategoryDS2",
+						"type": "DatasetReference"
+					},
+					"name": "ProductCategoryStream"
+				},
+				{
+					"dataset": {
+						"referenceName": "dimProductDS",
+						"type": "DatasetReference"
+					},
+					"name": "dimProductLatestData"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "dimProductDS",
+						"type": "DatasetReference"
+					},
+					"name": "dimProductdStream"
+				}
+			],
+			"transformations": [
+				{
+					"name": "productJOINproductModel"
+				},
+				{
+					"name": "ProductCategoryJOINprevDS"
+				},
+				{
+					"name": "selectColumns"
+				},
+				{
+					"name": "productSK"
+				},
+				{
+					"name": "doesProductExists"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          ProductID as integer,",
+				"          Name as string,",
+				"          ProductNumber as string,",
+				"          Color as string,",
+				"          StandardCost as decimal(19,4),",
+				"          ListPrice as decimal(19,4),",
+				"          Size as string,",
+				"          Weight as decimal(8,2),",
+				"          ProductCategoryID as integer,",
+				"          ProductModelID as integer,",
+				"          SellStartDate as timestamp,",
+				"          SellEndDate as timestamp,",
+				"          DiscontinuedDate as timestamp,",
+				"          ThumbNailPhoto as binary,",
+				"          ThumbnailPhotoFileName as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> productTableStream",
+				"source(output(",
+				"          ProductModelID as integer,",
+				"          Name as string,",
+				"          CatalogDescription as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> ProductModelTableStream",
+				"source(output(",
+				"          ProductCategoryID as integer,",
+				"          ParentProductCategoryID as integer,",
+				"          Name as string,",
+				"          rowguid as string,",
+				"          ModifiedDate as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> ProductCategoryStream",
+				"source(output(",
+				"          ProductSK as integer,",
+				"          ProductID as integer,",
+				"          ProductModelID as integer,",
+				"          ProductcategoryID as integer,",
+				"          ProductName as string,",
+				"          ProductModelName as string,",
+				"          ProductCategoryName as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table',",
+				"     staged: true) ~> dimProductLatestData",
+				"doesProductExists, ProductModelTableStream join(productTableStream@ProductModelID == ProductModelTableStream@ProductModelID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> productJOINproductModel",
+				"productJOINproductModel, ProductCategoryStream join(productTableStream@ProductCategoryID == ParentProductCategoryID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> ProductCategoryJOINprevDS",
+				"ProductCategoryJOINprevDS select(mapColumn(",
+				"          ProductID,",
+				"          ProductName = productTableStream@Name,",
+				"          ProductCategoryID = productTableStream@ProductCategoryID,",
+				"          ProductModelID = productTableStream@ProductModelID,",
+				"          ProductModelName = ProductModelTableStream@Name,",
+				"          ProductCategoryName = ProductCategoryStream@Name",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectColumns",
+				"selectColumns keyGenerate(output(ProductSK as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> productSK",
+				"productTableStream, dimProductLatestData exists(productTableStream@ProductID == dimProductLatestData@ProductID,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> doesProductExists",
+				"productSK sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          ProductSK as integer,",
+				"          ProductID as integer,",
+				"          ProductModelID as integer,",
+				"          ProductcategoryID as integer,",
+				"          ProductName as string,",
+				"          ProductModelName as string,",
+				"          ProductCategoryName as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     staged: true,",
+				"     allowCopyCommand: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          ProductSK,",
+				"          ProductID,",
+				"          ProductModelID,",
+				"          ProductcategoryID = ProductCategoryID,",
+				"          ProductName,",
+				"          ProductModelName,",
+				"          ProductCategoryName",
+				"     )) ~> dimProductdStream"
+			]
+		}
+	}
+}

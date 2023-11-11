@@ -1,0 +1,41 @@
+{
+	"name": "03dataFlowDimTable_Product_Pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "03productdataflowDimensionTable",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "03productdataflowDimensionTable",
+						"type": "DataFlowReference"
+					},
+					"staging": {
+						"linkedService": {
+							"referenceName": "ADF_to_ADLS_LS",
+							"type": "LinkedServiceReference"
+						},
+						"folderPath": "staging"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-11-07T05:57:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

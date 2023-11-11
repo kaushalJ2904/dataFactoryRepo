@@ -1,0 +1,60 @@
+{
+	"name": "DestinationDataset_5u0",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ADF_to_ASA_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "Correlation id",
+				"type": "varchar"
+			},
+			{
+				"name": "Operation name",
+				"type": "varchar"
+			},
+			{
+				"name": "Status",
+				"type": "varchar"
+			},
+			{
+				"name": "Event category",
+				"type": "varchar"
+			},
+			{
+				"name": "Level",
+				"type": "varchar"
+			},
+			{
+				"name": "Time",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "Subscription",
+				"type": "varchar"
+			},
+			{
+				"name": "Event initiated by",
+				"type": "varchar"
+			},
+			{
+				"name": "Resource type",
+				"type": "varchar"
+			},
+			{
+				"name": "Resource group",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "logdata"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

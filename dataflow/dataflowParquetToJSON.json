@@ -1,0 +1,69 @@
+{
+	"name": "dataflowParquetToJSON",
+	"properties": {
+		"description": "A mapping dataflow to generate JSON file using parquet source file.",
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "logdata_Parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sourceParquetStream"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ParquetToJSON_DS",
+						"type": "DatasetReference"
+					},
+					"name": "sinkJSON"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          Id as string,",
+				"          Correlationid as string,",
+				"          Operationname as string,",
+				"          Status as string,",
+				"          Eventcategory as string,",
+				"          Level as string,",
+				"          Time as string,",
+				"          Subscription as string,",
+				"          Eventinitiatedby as string,",
+				"          Resourcetype as string,",
+				"          Resourcegroup as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> sourceParquetStream",
+				"sourceParquetStream sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     partitionFileNames:['logJOSN'],",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          Id,",
+				"          Correlationid,",
+				"          Operationname,",
+				"          Status,",
+				"          Eventcategory,",
+				"          Level,",
+				"          Time,",
+				"          Subscription,",
+				"          Eventinitiatedby,",
+				"          Resourcetype,",
+				"          Resourcegroup",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> sinkJSON"
+			]
+		}
+	}
+}

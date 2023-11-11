@@ -1,0 +1,88 @@
+{
+	"name": "dataflowFilteringRows",
+	"properties": {
+		"description": "A dataflow that loads data from a parquet file hosted in ADLS gen 2 storage to a sink in Synapse dedicated pool",
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "logdata_Parquet",
+						"type": "DatasetReference"
+					},
+					"name": "sourceStream"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "pool_db_parquet_dataset",
+						"type": "DatasetReference"
+					},
+					"name": "logDataParquetSinkStream"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filteredLogDataParquetStream"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Id as string,",
+				"          Correlationid as string,",
+				"          Operationname as string,",
+				"          Status as string,",
+				"          Eventcategory as string,",
+				"          Level as string,",
+				"          Time as string,",
+				"          Subscription as string,",
+				"          Eventinitiatedby as string,",
+				"          Resourcetype as string,",
+				"          Resourcegroup as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> sourceStream",
+				"sourceStream filter(!(isNull({Resourcegroup}))) ~> filteredLogDataParquetStream",
+				"filteredLogDataParquetStream sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Correlationid as string,",
+				"          Operationname as string,",
+				"          Status as string,",
+				"          Eventcategory as string,",
+				"          Level as string,",
+				"          Time as timestamp,",
+				"          Subscription as string,",
+				"          Eventinitiatedby as string,",
+				"          Resourcetype as string,",
+				"          Resourcegroup as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     staged: true,",
+				"     allowCopyCommand: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Correlationid,",
+				"          Operationname,",
+				"          Status,",
+				"          Eventcategory,",
+				"          Level,",
+				"          Time,",
+				"          Subscription,",
+				"          Eventinitiatedby,",
+				"          Resourcetype,",
+				"          Resourcegroup",
+				"     )) ~> logDataParquetSinkStream"
+			]
+		}
+	}
+}
